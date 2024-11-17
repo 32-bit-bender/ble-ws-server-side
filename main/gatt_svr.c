@@ -29,23 +29,23 @@
 
 /*** Maximum number of characteristics with the notify flag ***/
 #define MAX_NOTIFY 5
-
+// 1e8bf549-0add-4570-98b0-084ab86579b7
 static const ble_uuid128_t gatt_svr_svc_uuid =
-    BLE_UUID128_INIT(0x2d, 0x71, 0xa2, 0x59, 0xb4, 0x58, 0xc8, 0x12,
-                     0x99, 0x99, 0x43, 0x95, 0x12, 0x2f, 0x46, 0x59);
+    BLE_UUID128_INIT(0xb7, 0x79, 0x65, 0xb8, 0x4a, 0x08, 0xb0, 0x98,
+                     0x70, 0x45, 0xdd, 0x0a, 0x49, 0xf5, 0x8b, 0x1e);
 
 /* A characteristic that can be subscribed to */
-static uint8_t gatt_svr_chr_val;
+// b1acc14b-2548-44ce-bd62-bcdc986e721e
+
 static uint16_t gatt_svr_chr_val_handle;
 static const ble_uuid128_t gatt_svr_chr_uuid =
-    BLE_UUID128_INIT(0x00, 0x00, 0x00, 0x00, 0x11, 0x11, 0x11, 0x11,
-                     0x22, 0x22, 0x22, 0x22, 0x33, 0x33, 0x33, 0x33);
+    BLE_UUID128_INIT(0x1e, 0x72, 0x6e, 0x98, 0xdc, 0xbc, 0x62, 0xbd,
+                     0xce, 0x44, 0x48, 0x25, 0x4b, 0xc1, 0xac, 0xb1);
 
-/* A custom descriptor */
-static uint8_t gatt_svr_dsc_val;
-static const ble_uuid128_t gatt_svr_dsc_uuid =
-    BLE_UUID128_INIT(0x01, 0x01, 0x01, 0x01, 0x12, 0x12, 0x12, 0x12,
-                     0x23, 0x23, 0x23, 0x23, 0x34, 0x34, 0x34, 0x34);
+//@_____Some variables used in service and characteristic declaration______
+char characteristic_value[] = "Amine's weather station"; //!! When client read characteristic, he get this value. You can also set this value in your code.
+
+
 
 static int
 gatt_svc_access(uint16_t conn_handle, uint16_t attr_handle,
@@ -62,57 +62,37 @@ static const struct ble_gatt_svc_def gatt_svr_svcs[] = {
                 /*** This characteristic can be subscribed to by writing 0x00 and 0x01 to the CCCD ***/
                 .uuid = &gatt_svr_chr_uuid.u,
                 .access_cb = gatt_svc_access,
-#if CONFIG_EXAMPLE_ENCRYPTION
-                .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE |
-                BLE_GATT_CHR_F_READ_ENC | BLE_GATT_CHR_F_WRITE_ENC |
-                BLE_GATT_CHR_F_NOTIFY | BLE_GATT_CHR_F_INDICATE,
-#else
-                .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_NOTIFY | BLE_GATT_CHR_F_INDICATE,
-#endif
+                .flags = BLE_GATT_CHR_F_READ,
                 .val_handle = &gatt_svr_chr_val_handle,
-                .descriptors = (struct ble_gatt_dsc_def[])
-                { {
-                      .uuid = &gatt_svr_dsc_uuid.u,
-#if CONFIG_EXAMPLE_ENCRYPTION
-                      .att_flags = BLE_ATT_F_READ | BLE_ATT_F_READ_ENC,
-#else
-                      .att_flags = BLE_ATT_F_READ,
-#endif
-                      .access_cb = gatt_svc_access,
-                    }, {
-                      0, /* No more descriptors in this characteristic */
-                    }
-                },
             }, {
                 0, /* No more characteristics in this service. */
             }
         },
     },
-
     {
         0, /* No more services. */
     },
 };
 
-static int
-gatt_svr_write(struct os_mbuf *om, uint16_t min_len, uint16_t max_len,
-               void *dst, uint16_t *len)
-{
-    uint16_t om_len;
-    int rc;
+// static int
+// gatt_svr_write(struct os_mbuf *om, uint16_t min_len, uint16_t max_len,
+//                void *dst, uint16_t *len)
+// {
+//     uint16_t om_len;
+//     int rc;
 
-    om_len = OS_MBUF_PKTLEN(om);
-    if (om_len < min_len || om_len > max_len) {
-        return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
-    }
+//     om_len = OS_MBUF_PKTLEN(om);
+//     if (om_len < min_len || om_len > max_len) {
+//         return BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
+//     }
 
-    rc = ble_hs_mbuf_to_flat(om, dst, max_len, len);
-    if (rc != 0) {
-        return BLE_ATT_ERR_UNLIKELY;
-    }
+//     rc = ble_hs_mbuf_to_flat(om, dst, max_len, len);
+//     if (rc != 0) {
+//         return BLE_ATT_ERR_UNLIKELY;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
 /**
  * Access callback whenever a characteristic/descriptor is read or written to.
@@ -129,7 +109,6 @@ static int
 gatt_svc_access(uint16_t conn_handle, uint16_t attr_handle,
                 struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
-    const ble_uuid_t *uuid;
     int rc;
 
     switch (ctxt->op) {
@@ -141,54 +120,13 @@ gatt_svc_access(uint16_t conn_handle, uint16_t attr_handle,
             MODLOG_DFLT(INFO, "Characteristic read by NimBLE stack; attr_handle=%d\n",
                         attr_handle);
         }
-        uuid = ctxt->chr->uuid;
+
         if (attr_handle == gatt_svr_chr_val_handle) {
             rc = os_mbuf_append(ctxt->om,
-                                &gatt_svr_chr_val,
-                                sizeof(gatt_svr_chr_val));
+                                &characteristic_value,
+                                sizeof(characteristic_value));
             return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
         }
-        goto unknown;
-
-    case BLE_GATT_ACCESS_OP_WRITE_CHR:
-        if (conn_handle != BLE_HS_CONN_HANDLE_NONE) {
-            MODLOG_DFLT(INFO, "Characteristic write; conn_handle=%d attr_handle=%d",
-                        conn_handle, attr_handle);
-        } else {
-            MODLOG_DFLT(INFO, "Characteristic write by NimBLE stack; attr_handle=%d",
-                        attr_handle);
-        }
-        uuid = ctxt->chr->uuid;
-        if (attr_handle == gatt_svr_chr_val_handle) {
-            rc = gatt_svr_write(ctxt->om,
-                                sizeof(gatt_svr_chr_val),
-                                sizeof(gatt_svr_chr_val),
-                                &gatt_svr_chr_val, NULL);
-            ble_gatts_chr_updated(attr_handle);
-            MODLOG_DFLT(INFO, "Notification/Indication scheduled for "
-                        "all subscribed peers.\n");
-            return rc;
-        }
-        goto unknown;
-
-    case BLE_GATT_ACCESS_OP_READ_DSC:
-        if (conn_handle != BLE_HS_CONN_HANDLE_NONE) {
-            MODLOG_DFLT(INFO, "Descriptor read; conn_handle=%d attr_handle=%d\n",
-                        conn_handle, attr_handle);
-        } else {
-            MODLOG_DFLT(INFO, "Descriptor read by NimBLE stack; attr_handle=%d\n",
-                        attr_handle);
-        }
-        uuid = ctxt->dsc->uuid;
-        if (ble_uuid_cmp(uuid, &gatt_svr_dsc_uuid.u) == 0) {
-            rc = os_mbuf_append(ctxt->om,
-                                &gatt_svr_dsc_val,
-                                sizeof(gatt_svr_chr_val));
-            return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
-        }
-        goto unknown;
-
-    case BLE_GATT_ACCESS_OP_WRITE_DSC:
         goto unknown;
 
     default:
@@ -253,9 +191,6 @@ gatt_svr_init(void)
     if (rc != 0) {
         return rc;
     }
-
-    /* Setting a value for the read-only descriptor */
-    gatt_svr_dsc_val = 0x99;
 
     return 0;
 }

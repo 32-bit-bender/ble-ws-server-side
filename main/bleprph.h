@@ -42,6 +42,8 @@ struct ble_gatt_register_ctxt;
 void gatt_svr_register_cb(struct ble_gatt_register_ctxt *ctxt, void *arg);
 int gatt_svr_init(void);
 
+void nimble_server_init (void);
+void ble_store_config_init(void);
 #ifdef __cplusplus
 }
 #endif
