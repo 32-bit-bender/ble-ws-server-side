@@ -43,7 +43,7 @@ static const ble_uuid128_t gatt_svr_chr_uuid =
                      0xce, 0x44, 0x48, 0x25, 0x4b, 0xc1, 0xac, 0xb1);
 
 //@_____Some variables used in service and characteristic declaration______
-char characteristic_value[] = "Amine's weather station"; //!! When client read characteristic, he get this value. You can also set this value in your code.
+uint8_t ble_characteristic_value[5] = {0}; //!! When client read characteristic, he get this value. You can also set this value in your code.
 
 
 
@@ -123,8 +123,8 @@ gatt_svc_access(uint16_t conn_handle, uint16_t attr_handle,
 
         if (attr_handle == gatt_svr_chr_val_handle) {
             rc = os_mbuf_append(ctxt->om,
-                                &characteristic_value,
-                                sizeof(characteristic_value));
+                                &ble_characteristic_value,
+                                sizeof(ble_characteristic_value));
             return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
         }
         goto unknown;

@@ -28,6 +28,8 @@
 extern "C" {
 #endif
 
+extern uint8_t ble_characteristic_value[5];
+
 struct ble_hs_cfg;
 struct ble_gatt_register_ctxt;
 

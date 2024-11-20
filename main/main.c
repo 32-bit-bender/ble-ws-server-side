@@ -27,9 +27,15 @@
 #include "console/console.h"
 #include "services/gap/ble_svc_gap.h"
 #include "bleprph.h"
+/*DHT11*/
+#include "drv/drv_dht11.h"
+
+#define DHT11_PIN  18
+#define CONFIG_SENSOR_READ_PERIOD 2000
 
 
 void nvs_init (void);
+void periodic_sensor_reads(void* pvParameters);
 
 
 void
@@ -37,9 +43,10 @@ app_main(void)
 {
     (void) nvs_init ();
     (void) nimble_server_init ();
+    xTaskCreate(periodic_sensor_reads, "Periodic sensor reading task",
+                2048, NULL, 1, NULL);
 }
 
-delay
 
 void nvs_init (){
     /* Initialize NVS — it is used to store PHY calibration data */
@@ -49,4 +56,23 @@ void nvs_init (){
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+}
+
+void periodic_sensor_reads(void* pvParameters)
+{
+    dht11_raw_data raw_data;
+    while (1)
+    {
+        dht11_err read_status;
+        read_status = dht11_read_raw_data(DHT11_PIN, &raw_data);
+        if (read_status == DHT11_SUCCESS)
+        {
+            ble_characteristic_value[0] = raw_data.hum_high;
+            ble_characteristic_value[1] = raw_data.hum_low;
+            ble_characteristic_value[2] = raw_data.temp_high;
+            ble_characteristic_value[3] = raw_data.hum_low;
+            ble_characteristic_value[4] = raw_data.crc;
+        }
+        vTaskDelay(CONFIG_SENSOR_READ_PERIOD/portTICK_PERIOD_MS);
+    }
 }
