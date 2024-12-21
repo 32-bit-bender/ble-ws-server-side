@@ -18,6 +18,7 @@ The server side uses a very simple BLE profile:
 
 ### Hardware Connection
 
+```
       ESP Board                            DHT11 Sensor
 ┌──────────────────────┐              ┌────────────────────┐
 │             GND      ├──────────────┤ Ground             │
@@ -27,6 +28,7 @@ The server side uses a very simple BLE profile:
 │             GPIO18   |◄────────────►│ Signal             │
 │                      │              │                    │
 └──────────────────────┘              └────────────────────┘
+```
 
 ### Build, Flash, and Monitor
 
