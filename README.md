@@ -32,8 +32,7 @@ The server side uses a very simple BLE profile:
 
 ### Build, Flash, and Monitor
 
-* Prerequisites: You must have ESP-IDF installed on your machine. If that's not the case, follow the guide below:
-https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html
+* Prerequisites: You must have ESP-IDF installed on your machine. If that's not the case, follow the official guide [for linux](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/linux-macos-setup.html) or [for windows](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/windows-setup.html).
 
 * Clone the project
 * Build using `idf.py build`
