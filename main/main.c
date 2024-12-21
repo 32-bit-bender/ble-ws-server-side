@@ -65,14 +65,16 @@ void periodic_sensor_reads(void* pvParameters)
     {
         dht11_err read_status;
         read_status = dht11_read_raw_data(DHT11_PIN, &raw_data);
+
         if (read_status == DHT11_SUCCESS)
         {
-            ble_characteristic_value[0] = raw_data.hum_high;
-            ble_characteristic_value[1] = raw_data.hum_low;
-            ble_characteristic_value[2] = raw_data.temp_high;
+            ble_characteristic_value[0] = raw_data.temp_high;
+            ble_characteristic_value[1] = raw_data.temp_low;
+            ble_characteristic_value[2] = raw_data.hum_high;
             ble_characteristic_value[3] = raw_data.hum_low;
             ble_characteristic_value[4] = raw_data.crc;
         }
+
         vTaskDelay(CONFIG_SENSOR_READ_PERIOD/portTICK_PERIOD_MS);
     }
 }

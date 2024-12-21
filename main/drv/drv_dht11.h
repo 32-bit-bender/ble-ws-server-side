@@ -25,19 +25,14 @@ typedef struct
     uint8_t temp_high;
     uint8_t temp_low;
     uint8_t crc;
-}dht11_raw_data;
+} dht11_raw_data;
 
 typedef enum
 {
     DHT11_SUCCESS = 0,
     DHT11_FAIL    = -1
-}dht11_err;
-
+} dht11_err;
 
 dht11_err dht11_read_raw_data(gpio_num_t pin_number, dht11_raw_data* raw_data);
-
-
-
-
 
 #endif //DRV_DHT11_H

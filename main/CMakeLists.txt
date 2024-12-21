@@ -1,6 +1,6 @@
 set(srcs "main.c"
-         "gatt_svr.c"
-         "gap_svr.c"
+         "server_gatt.c"
+         "server_gap.c"
          "drv/drv_dht11.c")
 
 idf_component_register(SRCS "${srcs}"

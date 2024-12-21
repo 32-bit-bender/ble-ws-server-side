@@ -8,12 +8,10 @@
 #include "services/gap/ble_svc_gap.h"
 #include "bleprph.h"
 
-
 static const char *tag = "NimBLE_BLE_PRPH";
 static int bleprph_gap_event(struct ble_gap_event *event, void *arg);
-
+static const uint8_t custom_mac[6] = {0x77,0x65,0x61,0x74,0x64,0xf2};
 static uint8_t own_addr_type;
-
 
 /**
  * Logs information about a connection to the console.
@@ -83,12 +81,6 @@ bleprph_advertise(void)
     fields.name = (uint8_t *)name;
     fields.name_len = strlen(name);
     fields.name_is_complete = 1;
-
-    fields.uuids16 = (ble_uuid16_t[]) {
-        BLE_UUID16_INIT(GATT_SVR_SVC_ALERT_UUID)
-    };
-    fields.num_uuids16 = 1;
-    fields.uuids16_is_complete = 1;
 
     rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0) {
@@ -288,7 +280,6 @@ bleprph_gap_event(struct ble_gap_event *event, void *arg)
         /* The default behaviour for the event is to reject authorize request */
         event->authorize.out_response = BLE_GAP_AUTHORIZE_REJECT;
         return 0;
-
     }
 
     return 0;
@@ -300,16 +291,15 @@ bleprph_on_reset(int reason)
     MODLOG_DFLT(ERROR, "Resetting state; reason=%d\n", reason);
 }
 
-
-
 static void
 bleprph_on_sync(void)
 {
     int rc;
 
-    rc = ble_hs_util_ensure_addr(0);
-    assert(rc == 0);
+    rc = ble_hs_id_set_rnd(custom_mac);
 
+    rc = ble_hs_util_ensure_addr(1);
+    assert(rc == 0);
     /* Figure out address to use while advertising (no privacy for now) */
     rc = ble_hs_id_infer_auto(0, &own_addr_type);
     if (rc != 0) {
@@ -326,7 +316,6 @@ bleprph_on_sync(void)
     MODLOG_DFLT(INFO, "\n");
     /* Begin advertising. */
     bleprph_advertise();
-
 }
 
 void bleprph_host_task(void *param)
@@ -338,9 +327,8 @@ void bleprph_host_task(void *param)
     nimble_port_freertos_deinit();
 }
 
-
-void nimble_server_init(){
-
+void nimble_server_init()
+{
     int rc;
     esp_err_t ret;
 
