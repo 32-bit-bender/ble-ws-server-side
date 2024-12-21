@@ -1,4 +1,4 @@
-# Weather Station Introduction
+# Bluetooth Low Energy Weather Station
 
 This is a two part project for a basic weather station running on two `ESP32` boards, a `DHT11` temperature and humidity sensor and a `ILI9341` TFT display. The main goal of this project is to read and advertise the sensor data using the ESP32 on the server side and display the data on the display side. Both ESP32s use the NimBLE stack, with the display side acting as the central and the server side as the peripheral.
 
